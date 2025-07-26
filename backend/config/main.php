@@ -114,6 +114,7 @@ return [
             'site/*',
             'gridview/*',
             'datecontrol/*',
+            'item/item-report',
 			// 'debug/*',
             // '*',
         ]
