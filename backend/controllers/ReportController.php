@@ -365,9 +365,9 @@ class ReportController extends Controller
         if ($date_end == '')    $date_end   = date('Y-m-d');
 
         $query = DebtHistory::find();
-        $query->where(['between', 'date', $date_start, $date_end]);
+        // $query->where(['between', 'date', $date_start, $date_end]);
         $query->andWhere(['customer_id' => $customer_id]);
-        $query->orderBy(['date' => SORT_ASC]);
+        $query->orderBy(['date' => SORT_ASC, 'type' => SORT_ASC]);
         $models = $query->all();
 
         $title  = 'LAPORAN HISTORY PIUTANG PER PELANGGAN';

@@ -8,6 +8,11 @@ h1, h2, h3, h4, h5, h6, .main-header .logo .logo-lg {
     font-family: "Barlow", "Titillium Web", "Segoe UI", "Ubuntu", "Helvetica Neue", "Arial", sans-serif;
 }
 
+.condensed {
+    width: 1px;
+    white-space: nowrap;
+}
+
 .wrap {
     min-height: 100%;
     height: auto;

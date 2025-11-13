@@ -6,15 +6,6 @@ use Yii;
 
 /**
  * This is the model class for table "_debt_history".
- *
- * @property integer $customer_id
- * @property string $date
- * @property integer $outgoing_id
- * @property double $debt
- * @property integer $payment_id
- * @property integer $credit
- * @property integer $adjustment
- * @property integer $return
  */
 class DebtHistory extends \yii\db\ActiveRecord
 {
@@ -43,9 +34,8 @@ class DebtHistory extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['customer_id', 'outgoing_id', 'payment_id', 'credit', 'adjustment', 'return'], 'integer'],
-            [['date', 'remark'], 'safe'],
-            [['debt'], 'number'],
+            [['id', 'customer_id', 'amount', 'adjustment', 'return'], 'integer'],
+            [['type', 'date', 'remark'], 'safe'],
         ];
     }
 
@@ -55,14 +45,13 @@ class DebtHistory extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
+            'type' => 'Jenis',
+            'date' => 'Tanggal',
             'customer_id' => 'Customer',
-            'date' => 'Date',
-            'outgoing_id' => 'Outgoing',
-            'debt' => 'Debt',
-            'payment_id' => 'Payment',
-            'credit' => 'Credit',
-            'adjustment' => 'Adjustment',
-            'return' => 'Return',
+            'amount' => 'Jumlah',
+            'adjustment' => 'Potongan',
+            'return' => 'Retur',
+            'remark' => 'Keterangan',
         ];
     }
 

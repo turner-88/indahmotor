@@ -27,12 +27,13 @@ $to                 = $date_end;
 
 $initial_debt = 0;
 if (($customer = Customer::findOne($customer_id)) !== null) $initial_debt = $customer->initial_debt;
+if (!$initial_debt) $initial_debt = 0;
 
-$sum_amount     = DebtHistory::find()->where(['customer_id' => $customer_id])->andWhere(['<', 'date', $from])->sum('credit');
-$sum_adjustment = DebtHistory::find()->where(['customer_id' => $customer_id])->andWhere(['<', 'date', $from])->sum('adjustment');
-$sum_return     = DebtHistory::find()->where(['customer_id' => $customer_id])->andWhere(['<', 'date', $from])->sum('`return`');
-$sum_outgoing   = DebtHistory::find()->where(['customer_id' => $customer_id])->andWhere(['<', 'date', $from])->sum('debt');
-$debt_before    = $sum_outgoing - ($sum_amount + $sum_adjustment + $sum_return) + $initial_debt;
+// $sum_amount     = DebtHistory::find()->where(['customer_id' => $customer_id])->andWhere(['<', 'date', $from])->sum('credit');
+// $sum_adjustment = DebtHistory::find()->where(['customer_id' => $customer_id])->andWhere(['<', 'date', $from])->sum('adjustment');
+// $sum_return     = DebtHistory::find()->where(['customer_id' => $customer_id])->andWhere(['<', 'date', $from])->sum('`return`');
+// $sum_outgoing   = DebtHistory::find()->where(['customer_id' => $customer_id])->andWhere(['<', 'date', $from])->sum('debt');
+// $debt_before    = $sum_outgoing - ($sum_amount + $sum_adjustment + $sum_return) + $initial_debt;
 
 ?>
 
@@ -66,7 +67,7 @@ $debt_before    = $sum_outgoing - ($sum_amount + $sum_adjustment + $sum_return) 
         ]
     ]); */ ?>
 
-    <div style="display: inline-block; width: 150px; vertical-align: bottom;">
+    <div style="display: none; width: 150px; vertical-align: bottom;">
     <?= DatePicker::widget([
         'name' => 'date_start',
         'value' => $date_start,
@@ -79,7 +80,7 @@ $debt_before    = $sum_outgoing - ($sum_amount + $sum_adjustment + $sum_return) 
     ]); ?>
     </div>
 
-    <div style="display: inline-block; width: 150px; vertical-align: bottom;">
+    <div style="display: none; width: 150px; vertical-align: bottom;">
     <?= DatePicker::widget([
         'name' => 'date_end',
         'value' => $date_end,
@@ -140,48 +141,51 @@ $debt_before    = $sum_outgoing - ($sum_amount + $sum_adjustment + $sum_return) 
             <span class="text-muted">Tidak ada data.</span>
         <?php } else { ?>
         
-        <div class="text-right"><b>PIUTANG AWAL : Rp <?= Yii::$app->formatter->asDecimal($debt_before, 0) ?></b></div>
-        <p></p>
+        <div class="text-right"><b>PIUTANG AWAL : Rp <?= Yii::$app->formatter->asDecimal($initial_debt, 0) ?></b></div>
+        <!-- <p></p> -->
         
         <table width="100%" class="table table-report">
             <thead>
             <tr class="thead" style="border-bottom:2px solid #eee;">
-                <td class="text-right" style="width:1px">No</td>
-                <?php if ($date_start != $date_end) { ?><td>Tanggal</td><?php } ?>
-                <?php if (!$customer_id) { ?><td>Customer</td><?php } ?>
-                <td class="text-right">No. Faktur</td>  
-                <td class="text-right">Nilai Faktur</td>  
-                <td class="text-right">Jumlah Bayar</td>  
-                <td class="text-right">Disc Bayar</td>  
-                <td class="text-right">Return</td>  
-                <td class="text-right">Sisa Piutang</td>  
-                <td>Keterangan</td>  
+                <td class="condensed text-right" style="width:1px">No</td>
+                <?php if ($date_start != $date_end) { ?><td class="condensed">Tanggal</td><?php } ?>
+                <?php if (!$customer_id) { ?><td class="condensed">Customer</td><?php } ?>
+                <td class="condensed text-right">Jenis</td>  
+                <td class="condensed text-right">ID</td>  
+                <td class="condensed text-right">Jumlah</td>  
+                <td class="condensed text-right">Disc</td>  
+                <td class="condensed text-right">Return</td>  
+                <td class="condensed text-right">Sisa Piutang</td>  
+                <td class="">Keterangan</td>  
             </tr>
             </thead>
 
         <?php
         $i = 0;
-        $total = 0;
+        $total = $initial_debt;
         foreach ($models as $model) {
-            $total += $model->credit;
-            $debt_before = $debt_before + $model->debt - ($model->credit + $model->adjustment + $model->return);
+            if ($model->type == 'outgoing') {
+                $total += $model->amount;
+            } else {
+                $total -= ($model->amount + $model->adjustment + $model->return);
+            }
         ?>
-            <tr>
-                <td class="text-right" style="width:1px"><?= ++$i ?></td>
-                <?php if ($date_start != $date_end) { ?><td><?= Yii::$app->formatter->asDate($model->date) ?></td><?php } ?>
-                <?php if (!$customer_id) { ?><td><?= $model->customer->name ?></td><?php } ?>
-                <td class="text-right"><?= $model->outgoing ? $model->outgoing->idText : '' ?></td>
-                <td class="text-right"><?= Yii::$app->formatter->asDecimal($model->debt, 0) ?></td>
-                <td class="text-right"><?= Yii::$app->formatter->asDecimal($model->credit, 0) ?></td>
-                <td class="text-right"><?= Yii::$app->formatter->asDecimal($model->adjustment, 0) ?></td>
-                <td class="text-right"><?= Yii::$app->formatter->asDecimal($model->return, 0) ?></td>
-                <td class="text-right"><?= Yii::$app->formatter->asDecimal($debt_before, 0) ?></td>
+            <tr class="<?= $model->type == 'payment' ? 'bg-success' : '' ?>">
+                <td class="condensed text-right" style="width:1px"><?= ++$i ?></td>
+                <?php if ($date_start != $date_end) { ?><td class="condensed"><?= Yii::$app->formatter->asDate($model->date) ?></td><?php } ?>
+                <?php if (!$customer_id) { ?><td class="condensed"><?= $model->customer->name ?></td><?php } ?>
+                <td class="condensed text-right"><?= $model->type == 'outgoing' ? 'Faktur' : 'Pembayaran' ?></td>
+                <td class="condensed text-right"><?= $model->id ?></td>
+                <td class="condensed text-right"><?= Yii::$app->formatter->asDecimal($model->amount, 0) ?></td>
+                <td class="condensed text-right"><?= Yii::$app->formatter->asDecimal($model->adjustment, 0) ?></td>
+                <td class="condensed text-right"><?= Yii::$app->formatter->asDecimal($model->return, 0) ?></td>
+                <td class="condensed text-right"><?= Yii::$app->formatter->asDecimal($total, 0) ?></td>
                 <td><?= $model->remark ?></td>
             </tr>
         <?php } ?>
         </table>
 
-        <div class="text-right"><b>SISA PIUTANG : Rp <?= Yii::$app->formatter->asDecimal($debt_before, 0) ?></b></div>
+        <div class="text-right"><b>SISA PIUTANG : Rp <?= Yii::$app->formatter->asDecimal($total, 0) ?></b></div>
 
         <?php } ?>
         
