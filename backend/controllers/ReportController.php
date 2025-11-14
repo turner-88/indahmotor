@@ -20,6 +20,7 @@ use backend\models\Expense;
 use backend\models\BalanceHistory;
 use backend\models\Item;
 use backend\models\StockHistoryDaily;
+use backend\models\TransactionHistory;
 use yii\web\ForbiddenHttpException;
 
 /**
@@ -364,7 +365,7 @@ class ReportController extends Controller
         if ($date_start == '')  $date_start = date('Y-m-d', strtotime('-6 days'));
         if ($date_end == '')    $date_end   = date('Y-m-d');
 
-        $query = DebtHistory::find();
+        $query = TransactionHistory::find();
         // $query->where(['between', 'date', $date_start, $date_end]);
         $query->andWhere(['customer_id' => $customer_id]);
         $query->orderBy(['date' => SORT_ASC, 'type' => SORT_ASC]);
