@@ -366,7 +366,7 @@ class ReportController extends Controller
         if ($date_end == '')    $date_end   = date('Y-m-d');
 
         $query = TransactionHistory::find();
-        // $query->where(['between', 'date', $date_start, $date_end]);
+        $query->where(['between', 'date', $date_start, $date_end]);
         $query->andWhere(['customer_id' => $customer_id]);
         $query->orderBy(['date' => SORT_ASC, 'type' => SORT_ASC]);
         $models = $query->all();
@@ -434,10 +434,6 @@ class ReportController extends Controller
         $sum_payment_return     = Payment::find()->where(['between', 'date', $date_start, $date_end])->sum('`return`');
         $sum_payment_adjustment = Payment::find()->where(['between', 'date', $date_start, $date_end])->sum('adjustment');
 
-        $total_amount       = DebtHistory::find()->sum('credit');
-        $total_adjustment   = DebtHistory::find()->sum('adjustment');
-        $total_return       = DebtHistory::find()->sum('`return`');
-        $total_outgoing     = DebtHistory::find()->sum('debt');
         $total_initial_debt = Customer::find()->sum('initial_debt');
 
         if ($salesman_id) {
@@ -446,14 +442,10 @@ class ReportController extends Controller
             $sum_payment_return       = Payment::find()->joinWith(['customer'])->where(['between', 'date', $date_start, $date_end])->andWhere(['salesman_id' => $salesman_id])->sum('`return`');
             $sum_payment_adjustment   = Payment::find()->joinWith(['customer'])->where(['between', 'date', $date_start, $date_end])->andWhere(['salesman_id' => $salesman_id])->sum('adjustment');
 
-            $total_amount       = DebtHistory::find()->joinWith(['customer'])->where(['salesman_id' => $salesman_id])->sum('credit');
-            $total_adjustment   = DebtHistory::find()->joinWith(['customer'])->where(['salesman_id' => $salesman_id])->sum('adjustment');
-            $total_return       = DebtHistory::find()->joinWith(['customer'])->where(['salesman_id' => $salesman_id])->sum('`return`');
-            $total_outgoing     = DebtHistory::find()->joinWith(['customer'])->where(['salesman_id' => $salesman_id])->sum('debt');
             $total_initial_debt = Customer::find()->where(['salesman_id' => $salesman_id])->sum('initial_debt');
         }
 
-        $total_debt = $total_outgoing - $total_amount - $total_adjustment - $total_return + $total_initial_debt;
+        $total_debt = $sum_outgoing - $sum_payment_amount - $sum_payment_adjustment - $sum_payment_return + $total_initial_debt;
 
         $title  = 'RESUME';
         $view   = 'balance';
