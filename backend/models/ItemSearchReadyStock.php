@@ -75,9 +75,25 @@ class ItemSearchReadyStock extends Item
             'updated_by' => $this->updated_by,
         ]);
 
-        $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'shortcode', $this->shortcode. '%', false])
-            ->andFilterWhere(['like', 'brand', $this->brand])
+        if ($this->name) {
+            $array = explode(' ', $this->name);
+            $params = ['and'];
+            foreach ($array as $element) {
+                $params = array_merge($params, [['like', 'name', $element]]);
+            }
+            $query->andFilterWhere($params);
+        }
+
+        if ($this->shortcode) {
+            $array = explode(' ', $this->shortcode);
+            $params = ['and'];
+            foreach ($array as $element) {
+                $params = array_merge($params, [['like', 'shortcode', $element]]);
+            }
+            $query->andFilterWhere($params);
+        }
+
+        $query->andFilterWhere(['like', 'brand', $this->brand])
             ->andFilterWhere(['like', 'type', $this->type])
             ->andFilterWhere(['like', 'unit_of_measurement', $this->unit_of_measurement])
             ->andFilterWhere([
