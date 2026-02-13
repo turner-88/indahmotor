@@ -85,8 +85,18 @@ class ItemSearch extends Item
             $query->andFilterWhere($params);
         }
 
-        $query->andFilterWhere(['like', 'shortcode', $this->shortcode. '%', false])
-            ->andFilterWhere(['like', 'brand', $this->brand])
+        if ($this->shortcode) {
+            $array = explode(' ', $this->shortcode);
+            $params = ['and'];
+            foreach ($array as $element) {
+                $params = array_merge($params, [['like', 'shortcode', $element]]);
+            }
+            // dd($params);
+            $query->andFilterWhere($params);
+        }
+
+        // $query->andFilterWhere(['like', 'shortcode', $this->shortcode. '%', false])
+        $query->andFilterWhere(['like', 'brand', $this->brand])
             ->andFilterWhere(['like', 'type', $this->type])
             ->andFilterWhere(['like', 'unit_of_measurement', $this->unit_of_measurement])
             ->andFilterWhere(['like', 'location', $this->location])
